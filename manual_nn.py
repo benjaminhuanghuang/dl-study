@@ -46,16 +46,26 @@ class multiply(Operation):
         self.inputs = [a_var, b_var]
         return a_var * b_var
 
-# matrix multipy
-
 
 class matmul(Operation):
+    '''
+    matrix multipy
+    '''
+
     def __init__(self, a, b):
         super().__init__([a, b])
 
     def compute(self, a_mat, b_mat):
         self.inputs = [a_mat, b_mat]
         return a_mat.dot(b_mat)
+
+
+class Sigmoid(Operation):
+    def __init__(self, z):
+        super().__init__([z])
+
+    def compute(self, z_val):
+        return 1 / (1 + np.exp(-z_val))
 
 
 class Variable():
@@ -132,7 +142,6 @@ class Session:
                 node.output = np.array(node.output)
         # Return the requested node value
         return operation.output
-
 
 
 if __name__ == "__main__":
