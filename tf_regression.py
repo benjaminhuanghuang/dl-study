@@ -1,44 +1,55 @@
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-# low, high, size
-x_data = np.linspace(0, 10, 10) + np.random.uniform(-1.5, 1.5, 10)
-y_label = np.linspace(0, 10, 10) + np.random.uniform(-1.5, 1.5, 10)
+x_data = np.linspace(0.0, 10.0, 1000000)
+noise = np.random.randn(len(x_data))
+# target m=0.5 b=5
+y_true = (0.5 * x_data) + 5 + noise
 
-plt.plot(x_data,y_label, '*')
+x_df = pd.DataFrame(data=x_data, columns=['X Data'])
+y_df = pd.DataFrame(data=y_true, columns=['Y'])
 
-np.random.rand(2)   
-# create to random number for m and b as the start point
-m = tf.Variable(0.44)
-b = tf.Variable(0.87)
+# concatemenaste data
+my_data = pd.concat([x_df, y_df], axis=1)
+my_data.sample(n=250).plot(kind='scatter', x='X Data',
+                           y="Y")    # pick 250 sample randomly
 
-error = 0
-for x, y in zip(x_data, y_label):
-    y_hat = m * x + b
-    error += (y - y_hat)**2   # the toss
+plt.show()
 
+batch_size = 8
+# pick slope and intercept randomly as the start
+m = tf.Variable(0.8)
+b = tf.Variable(0.17)
 
-# training
-optimizer = tf.train.GradientDescentOptimizer(learning_rate = 0.001)
+xph = tf.placeholder(tf.float32, [batch_size])
+yph = tf.placeholder(tf.float32, [batch_size])
+
+y_model = m * xph + b
+error = tf.reduce_sum(tf.square(yph - y_model))
+
+optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
 train = optimizer.minimize(error)
 
 init = tf.global_variables_initializer()
+
 with tf.Session() as sess:
     sess.run(init)
-    training_steps = 10
-    for i in range(training_steps):
-        sess.run(train)
+    batches = 1000
+    for i in range(batches):
+        rand_index = np.random.randint(len(x_data), size=batch_size)
+        feed = {xph: x_data[rand_index], yph: y_true[rand_index]}
+        sess.run(train, feed_dict=feed)
+    model_m, model_b = sess.run([m, b])
 
-    final_slope, final_intercept = sess.run([m, b])
+# target m = 0.5, b= 5
+print(model_m, model_b)
 
-x_test=np.linspace(-1,11,10)
-y_pred_plot = final_slope* x_test + final_intercept
-
-# predict  
-plt.plot(x_test,y_pred_plot, 'r')
-
+y_hat = x_data * model_m + model_b
+my_data.sample(250).plot(kind='scatter', x= "X Data", y='Y')
+plt.plot(x_data, y_hat, 'r' )
 plt.show()
