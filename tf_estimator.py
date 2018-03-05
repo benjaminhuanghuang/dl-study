@@ -56,6 +56,7 @@ my_data.sample(250).plot(kind='scatter', x="X Data", y='Y')
 
 
 feat_cols = [tf.feature_column.numeric_column('x', shape=[1])]
+#The Estimator object wraps a model which is specified by a model_fn, 
 estimator = tf.estimator.LinearRegressor(feature_columns=feat_cols)
 
 from sklearn.model_selection import train_test_split
