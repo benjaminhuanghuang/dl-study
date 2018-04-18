@@ -4,11 +4,15 @@
 '''
 import tensorflow as tf
 import numpy as np
-from tensorflow.exports.tutorials.mnist import input_data
+from tensorflow.examples.tutorials.mnist import input_data
 
+# A one-hot vector is a vector which is 0 in most dimensions, and 1 in a single dimension
+# For example, 3 would be [0,0,0,1,0,0,0,0,0,0]
 mnist = input_data.read_data_sets('./data/MNIST', one_hot=True)
 
+
 x = tf.placeholder(dtype=tf.float32, shape=[None, 784], name='x')
+# mnist.train.labels is a [55000, 10] array of floats
 y = tf.placeholder(dtype=tf.float32, shape=[None, 10], name='y')
 
 batch_size = 1000
