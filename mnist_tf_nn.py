@@ -40,7 +40,10 @@ def train_nn(data):
     # output of NN
     output = build_nn(data)
 
+    # softmax used for vector compairation
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=output))
+    
+    #
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=1).minimize(loss)
 
     with tf.Session() as sess:
