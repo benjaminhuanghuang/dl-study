@@ -1,10 +1,16 @@
 '''
     TensorFlow系列教程(2)——手写数字的识别
     https://www.youtube.com/watch?v=gx7iEa9Q-Vs
+   
+    TensorFlow Tutorials(3)——FC预测自己手写的图片
+    https://www.youtube.com/watch?v=WKHP6QBlb8Q
 '''
+import os
 import tensorflow as tf
 import numpy as np
 from tensorflow.examples.tutorials.mnist import input_data
+from PIL import Image
+import cv2
 
 # Read data
 # one-hot vector is a vector which is 0 in most dimensions, and 1 in a single dimension
@@ -42,22 +48,65 @@ def train_nn(data):
 
     # softmax used for vector compairation
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=output))
-    
+
     #
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=1).minimize(loss)
+    saver = tf.train.Saver()
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        for i in range(50):
-            epoch_cost = 0
-            for _ in range(int(mnist.train.num_examples / batch_size)):
-                x_data, y_data = mnist.train.next_batch(batch_size)
-                cost, _ = sess.run([loss, optimizer], feed_dict={x: x_data, y: y_data})
-                epoch_cost += cost
-            print('Epoch', i, ": ", epoch_cost)
-        accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(y, 1), tf.argmax(output, 1)), tf.float32))
-        acc = sess.run(accuracy, feed_dict={x: mnist.test.images, y: mnist.test.labels})
-        print("accuracy: ", acc)
+        if not os.path.exists('checkpoint')
+            for i in range(50):
+                epoch_cost = 0
+                for _ in range(int(mnist.train.num_examples / batch_size)):
+                    x_data, y_data = mnist.train.next_batch(batch_size)
+                    cost, _ = sess.run([loss, optimizer], feed_dict={x: x_data, y: y_data})
+                    epoch_cost += cost
+                print('Epoch', i, ": ", epoch_cost)
+
+                accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(y, 1), tf.argmax(output, 1)), tf.float32))
+            acc = sess.run(accuracy, feed_dict={x: mnist.test.images, y: mnist.test.labels})
+            print("accuracy: ", acc)
+            saver.save(sess, './mnist.skpt')
+        else:
+            saver.restore(sess, './mnist.skpt')
+
+        predict('./1.jpg', sess, output)
 
 
-train_nn(x)
+def reconstruct_image():
+    for i in range(10):
+        path = './imgs/{}'.format(i)
+        if not os.path.exists(path):
+            os.makedirs(path)
+    batch_size = 1
+    for i in range(int(mnist.train.num_examples / batch_size)):
+        x_data, y_data = mnist.train.next_batch(batch_size)
+        img = Image.fromarray(np.reshape(np.array(x_data[0]*255, dtype='uint8'), newshape=(28, 28)))
+        dir = np.argmax(y_data[0])
+        img.save('./imgs/{}/{}.bmp'.format(dir, i))
+
+
+def read_data(path):
+    image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    # is square
+    w, h = image.shape
+    max_ = max(w, h)
+    processed_img = cv2.resize(image, dsize=(max_, max_))
+    processed_img.np.resize(processed_img, new_shape=(1, 784))
+
+    return image, processed_img
+
+
+def predict(image_path, sess, output):
+    image, processed_image = read_data(image_path)
+    result = sess.run(output, feed_dict={x: processed_image})
+    result = np.argmax(result, 1)
+    print('The prediciton is', result)
+    cv2.putText(image, 'The prediction is {}'.format(result), (20, 20), cv2.FONT_HERSHEY_COMPLEX)
+    cv2.imshow('image', image)
+    cv2.waitKey(0)
+    sv2.destroyAllWindows()
+
+# train_nn(x)
+reconstruct_image()
