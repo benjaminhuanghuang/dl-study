@@ -55,7 +55,7 @@ def train_nn(data):
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        if not os.path.exists('checkpoint')
+        if not os.path.exists('checkpoint'):
             for i in range(50):
                 epoch_cost = 0
                 for _ in range(int(mnist.train.num_examples / batch_size)):
@@ -67,11 +67,11 @@ def train_nn(data):
                 accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(y, 1), tf.argmax(output, 1)), tf.float32))
             acc = sess.run(accuracy, feed_dict={x: mnist.test.images, y: mnist.test.labels})
             print("accuracy: ", acc)
-            saver.save(sess, './mnist.skpt')
+            saver.save(sess, './tmp/mnist.skpt')
         else:
-            saver.restore(sess, './mnist.skpt')
+            saver.restore(sess, './tmp/mnist.skpt')
 
-        predict('./1.jpg', sess, output)
+        predict('./input.png', sess, output)
 
 
 def reconstruct_image():
@@ -93,7 +93,7 @@ def read_data(path):
     w, h = image.shape
     max_ = max(w, h)
     processed_img = cv2.resize(image, dsize=(max_, max_))
-    processed_img.np.resize(processed_img, new_shape=(1, 784))
+    processed_img = np.resize(processed_img, new_shape=(1, 784))
 
     return image, processed_img
 
@@ -103,10 +103,12 @@ def predict(image_path, sess, output):
     result = sess.run(output, feed_dict={x: processed_image})
     result = np.argmax(result, 1)
     print('The prediciton is', result)
-    cv2.putText(image, 'The prediction is {}'.format(result), (20, 20), cv2.FONT_HERSHEY_COMPLEX)
+    cv2.putText(image, 'The prediction is {}'.format(result), (20, 20),
+                cv2.FONT_HERSHEY_COMPLEX, 1, color=(255, 255, 255))
     cv2.imshow('image', image)
     cv2.waitKey(0)
     sv2.destroyAllWindows()
 
-# train_nn(x)
-reconstruct_image()
+
+train_nn(x)
+# reconstruct_image()
