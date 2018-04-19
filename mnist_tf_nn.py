@@ -1,4 +1,7 @@
 '''
+    TensorFlow Tutorials(1)——Windows下环境搭建
+    https://www.youtube.com/watch?v=gItz_fBTeLM
+    
     TensorFlow系列教程(2)——手写数字的识别
     https://www.youtube.com/watch?v=gx7iEa9Q-Vs
    
